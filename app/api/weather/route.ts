@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { genAI, isGeminiMock } from '../../../src/utils/gemini';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const lat = searchParams.get('lat') || '28.6';
+    const lon = searchParams.get('lon') || '77.2';
+
     if (isGeminiMock()) {
       return NextResponse.json({
         temp: 24,
@@ -24,7 +28,7 @@ export async function GET() {
         advisories: [
           {
             title: 'Pause Irrigation — Rain Expected Tonight (Mock)',
-            desc: 'Heavy rain forecast starting 20:00 tonight. Suspend active watering cycles.',
+            desc: `Heavy rain forecast starting 20:00 tonight at coordinates (${lat}, ${lon}). Suspend active watering cycles.`,
             priority: 'urgent'
           },
           {
@@ -40,7 +44,8 @@ export async function GET() {
       model: 'gemini-1.5-flash',
     });
 
-    const prompt = `Generate a realistic agricultural weather forecast JSON report. The region is semi-humid.
+    const prompt = `Generate a realistic agricultural weather forecast JSON report. The location coordinates are latitude: ${lat}, longitude: ${lon}. 
+Generate weather statistics and agricultural advisories tailored to this specific location.
 Include: current temp, humidity, wind, pressure, uvIndex, rainProb, and a list of 2 AI advisories for a crop farmer.
 Response must be a raw JSON object containing these keys:
 {

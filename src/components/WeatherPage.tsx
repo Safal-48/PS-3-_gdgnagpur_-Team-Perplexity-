@@ -263,9 +263,15 @@ export const WeatherPage: React.FC = () => {
   const [spinning, setSpinning] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
 
-  const fetchWeather = async () => {
+  // Geolocation states
+  const [permission, setPermission] = useState<'prompt' | 'granted' | 'default' | 'loading'>('prompt');
+  const [lat, setLat] = useState<number>(28.6);
+  const [lon, setLon] = useState<number>(77.2);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  const fetchWeather = async (latitude: number, longitude: number) => {
     try {
-      const response = await fetch('/api/weather');
+      const response = await fetch(`/api/weather?lat=${latitude}&lon=${longitude}`);
       const data = await response.json();
       setWeather(data);
     } catch (err) {
@@ -273,13 +279,45 @@ export const WeatherPage: React.FC = () => {
     }
   };
 
-  React.useEffect(() => {
-    fetchWeather();
-  }, []);
+  const handleRequestGPS = () => {
+    setPermission('loading');
+    setLocError(null);
+    if (!navigator.geolocation) {
+      setLocError('Geolocation is not supported by your browser.');
+      setPermission('default');
+      fetchWeather(28.6, 77.2);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latitude = parseFloat(position.coords.latitude.toFixed(4));
+        const longitude = parseFloat(position.coords.longitude.toFixed(4));
+        setLat(latitude);
+        setLon(longitude);
+        setPermission('granted');
+        fetchWeather(latitude, longitude);
+      },
+      (error) => {
+        console.warn('Geolocation access failed:', error);
+        setLocError('Location permission denied or timed out. Falling back to default coordinates.');
+        setPermission('default');
+        fetchWeather(28.6, 77.2);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  const handleUseDefault = () => {
+    setLat(28.6);
+    setLon(77.2);
+    setPermission('default');
+    fetchWeather(28.6, 77.2);
+  };
 
   const handleRefresh = async () => {
     setSpinning(true);
-    await fetchWeather();
+    await fetchWeather(lat, lon);
     setLastRefresh(new Date());
     setSpinning(false);
   };
@@ -299,6 +337,84 @@ export const WeatherPage: React.FC = () => {
 
   const day = FORECAST[selectedDay];
 
+  if (permission === 'prompt' || permission === 'loading') {
+    return (
+      <div className="w-full min-h-[500px] flex items-center justify-center p-4 select-none">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="glass-panel max-w-md w-full rounded-3xl p-8 text-center relative overflow-hidden border border-emerald-500/10"
+        >
+          <div className="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse"
+              />
+              <div className="relative p-4 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <MapPin className="w-12 h-12" />
+              </div>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-black text-slate-100 mb-3 tracking-tight">
+            Enable Plot GPS Tracking
+          </h2>
+          
+          <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
+            KrishiCore requires access to your plot's exact coordinates to fetch real-time localized weather data, calculate dew points, and generate custom AI spray advisories.
+          </p>
+
+          {locError && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mb-5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-left"
+            >
+              <div className="flex gap-2 text-[10px] text-amber-300 font-semibold leading-relaxed">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{locError}</span>
+              </div>
+            </motion.div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleRequestGPS}
+              disabled={permission === 'loading'}
+              className="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-bold text-xs tracking-wide transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.35)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {permission === 'loading' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Detecting Location...</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-4 h-4" />
+                  <span>Detect GPS Location</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleUseDefault}
+              disabled={permission === 'loading'}
+              className="w-full py-3.5 rounded-2xl bg-slate-950/40 hover:bg-slate-950/60 active:scale-[0.98] border border-slate-800 text-slate-300 hover:text-slate-100 font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <span>Use Default Coordinates</span>
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full flex flex-col gap-6 select-none">
 
@@ -313,8 +429,17 @@ export const WeatherPage: React.FC = () => {
             <h2 className="text-xl font-bold text-slate-100">Weather Intelligence</h2>
             <div className="flex items-center gap-3 mt-0.5">
               <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
-                <MapPin className="w-3 h-3" /> Zone 1 — Plot Station (28.6°N, 77.2°E)
+                <MapPin className="w-3 h-3 text-emerald-400" />
+                {permission === 'granted'
+                  ? `Plot Location (${lat}°N, ${lon}°E)`
+                  : `Zone 1 — Default Station (${lat}°N, ${lon}°E)`}
               </p>
+              <button
+                onClick={() => setPermission('prompt')}
+                className="text-[9px] text-emerald-400 hover:underline cursor-pointer font-bold ml-1"
+              >
+                Change Location
+              </button>
               <span className="text-slate-700">·</span>
               <p className="text-[10px] text-slate-500 flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
