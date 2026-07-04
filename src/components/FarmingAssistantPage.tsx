@@ -231,11 +231,21 @@ export const FarmingAssistantPage: React.FC = () => {
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI thinking delay
-    const thinkTime = 1200 + Math.random() * 800;
-    await new Promise(r => setTimeout(r, thinkTime));
+    let responseText = '';
+    
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: trimmed })
+      });
+      const data = await response.json();
+      responseText = data.content;
+    } catch (err) {
+      console.error('AI chat endpoint query failed, falling back to mock:', err);
+      responseText = getAIResponse(trimmed);
+    }
 
-    const responseText = getAIResponse(trimmed);
     const aiMsg: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',

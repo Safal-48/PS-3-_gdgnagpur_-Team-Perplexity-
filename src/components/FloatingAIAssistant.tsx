@@ -14,26 +14,36 @@ export const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({ onNavi
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
     setMessages(prev => [...prev, { role: 'user', text }]);
     setInputValue('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      let aiText = "I've analyzed your real-time farm dashboard. Zone A's soil moisture is low (28%). I suggest watering or pruning tomatoes. For a deep consultation, click 'Open Full Advisor' below!";
-      
+    let aiText = '';
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await response.json();
+      aiText = data.content;
+    } catch (err) {
+      console.error('Floating AI chat query failed, falling back:', err);
+      // Fallback mocks
+      aiText = "I've analyzed your real-time farm dashboard. Zone A's soil moisture is low (28%). I suggest watering or pruning tomatoes.";
       const lower = text.toLowerCase();
       if (lower.includes('weather') || lower.includes('rain')) {
-        aiText = "Heavy rain is predicted at 20:00 tonight. I recommend pausing drip irrigation in all Zones to prevent over-saturation.";
+        aiText = "Heavy rain is predicted at 20:00 tonight. I recommend pausing drip irrigation in all Zones.";
       } else if (lower.includes('disease') || lower.includes('blight') || lower.includes('spot')) {
         aiText = "It looks like a possible Late Blight infection in Zone A. Prune brown leaves immediately and apply copper spray.";
       }
+    }
 
-      setMessages(prev => [...prev, { role: 'ai', text: aiText }]);
-      setIsTyping(false);
-    }, 1200);
+    setMessages(prev => [...prev, { role: 'ai', text: aiText }]);
+    setIsTyping(false);
   };
 
   return (

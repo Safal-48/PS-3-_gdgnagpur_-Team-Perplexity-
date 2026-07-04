@@ -245,15 +245,57 @@ const RainBar: React.FC<{ pct: number; color?: string }> = ({ pct, color = '#60a
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+interface WeatherData {
+  temp: number;
+  condition: string;
+  humidity: number;
+  wind: number;
+  pressure: number;
+  uvIndex: number;
+  rainProb: number;
+  hourly: HourlyData[];
+  advisories: { title: string; desc: string; priority: 'urgent' | 'normal' | 'good' }[];
+}
+
 export const WeatherPage: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState(0);
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [spinning, setSpinning] = useState(false);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
 
-  const handleRefresh = () => {
-    setSpinning(true);
-    setTimeout(() => { setLastRefresh(new Date()); setSpinning(false); }, 1200);
+  const fetchWeather = async () => {
+    try {
+      const response = await fetch('/api/weather');
+      const data = await response.json();
+      setWeather(data);
+    } catch (err) {
+      console.error('Weather API fetch failed:', err);
+    }
   };
+
+  React.useEffect(() => {
+    fetchWeather();
+  }, []);
+
+  const handleRefresh = async () => {
+    setSpinning(true);
+    await fetchWeather();
+    setLastRefresh(new Date());
+    setSpinning(false);
+  };
+
+  const activeTemp = weather ? weather.temp : 24;
+  const activeCondition = weather ? weather.condition : 'Partly Cloudy';
+  const activeHumidity = weather ? weather.humidity : 72;
+  const activeWind = weather ? weather.wind : 14;
+  const activePressure = weather ? weather.pressure : 1013;
+  const activeUvIndex = weather ? weather.uvIndex : 8;
+  const activeRainProb = weather ? weather.rainProb : 40;
+  const activeHourly = weather ? weather.hourly : HOURLY;
+  const activeAdvisories = weather ? weather.advisories : [
+    { title: 'Pause Irrigation — Rain Expected Tonight', desc: 'Heavy rain (65–75%) forecast from 20:00–23:00. Suspend all drip and sprinkler schedules in Zone 1–3. Expected precipitation: 18–24mm.', priority: 'urgent' },
+    { title: 'Complete Pesticide Spraying by 17:00', desc: 'Optimal spray window closes at 17:00 before wind picks up (projected 18 km/h). Apply copper fungicide to Zone A tomatoes now.', priority: 'urgent' }
+  ];
 
   const day = FORECAST[selectedDay];
 
@@ -300,17 +342,17 @@ export const WeatherPage: React.FC = () => {
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Current Weather</p>
               <div className="flex items-start gap-1">
-                <span className="text-7xl font-black text-white tracking-tighter leading-none">24</span>
+                <span className="text-7xl font-black text-white tracking-tighter leading-none">{activeTemp}</span>
                 <span className="text-3xl font-bold text-emerald-400 mt-2">°C</span>
               </div>
-              <p className="text-sm font-semibold text-slate-300 mt-1">Partly Cloudy</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Feels like 26°C</p>
+              <p className="text-sm font-semibold text-slate-300 mt-1">{activeCondition}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Feels like {activeTemp + 2}°C</p>
             </div>
             <motion.div
               animate={{ y: [-4, 4, -4] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <WeatherIcon condition="partly-cloudy" size={72} />
+              <WeatherIcon condition={activeCondition.toLowerCase().replace(' ', '-') as any} size={72} />
             </motion.div>
           </div>
 
@@ -319,14 +361,14 @@ export const WeatherPage: React.FC = () => {
               <ArrowUp className="w-3.5 h-3.5 text-rose-400 shrink-0" />
               <div>
                 <p className="text-[9px] text-slate-500 uppercase font-semibold">High</p>
-                <p className="text-xs font-bold text-slate-200">26°C</p>
+                <p className="text-xs font-bold text-slate-200">{activeTemp + 2}°C</p>
               </div>
             </div>
             <div className="p-2.5 bg-slate-950/40 rounded-xl border border-emerald-500/5 flex items-center gap-2">
               <ArrowDown className="w-3.5 h-3.5 text-blue-400 shrink-0" />
               <div>
                 <p className="text-[9px] text-slate-500 uppercase font-semibold">Low</p>
-                <p className="text-xs font-bold text-slate-200">18°C</p>
+                <p className="text-xs font-bold text-slate-200">{activeTemp - 6}°C</p>
               </div>
             </div>
           </div>
@@ -335,10 +377,10 @@ export const WeatherPage: React.FC = () => {
           <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Rain Probability</p>
-              <p className="text-xs font-black text-blue-300">40%</p>
+              <p className="text-xs font-black text-blue-300">{activeRainProb}%</p>
             </div>
-            <RainBar pct={40} color="#60a5fa" />
-            <p className="text-[10px] text-slate-400 mt-1.5">Rain expected from 19:00 tonight</p>
+            <RainBar pct={activeRainProb} color="#60a5fa" />
+            <p className="text-[10px] text-slate-400 mt-1.5">{activeRainProb > 50 ? 'Precipitation expected soon' : 'Precipitation unlikely'}</p>
           </div>
         </div>
 
@@ -347,10 +389,10 @@ export const WeatherPage: React.FC = () => {
 
           {/* Four radial gauges */}
           <div className="glass-panel rounded-3xl p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <RadialGauge value={72} max={100} color="#60a5fa" label="Humidity" unit="%" />
-            <RadialGauge value={14} max={60} color="#34d399" label="Wind" unit="km/h" />
-            <RadialGauge value={1013} max={1040} color="#a78bfa" label="Pressure" unit="hPa" />
-            <RadialGauge value={8} max={10} color="#fbbf24" label="UV Index" unit="/10" />
+            <RadialGauge value={activeHumidity} max={100} color="#60a5fa" label="Humidity" unit="%" />
+            <RadialGauge value={activeWind} max={60} color="#34d399" label="Wind" unit="km/h" />
+            <RadialGauge value={activePressure} max={1040} color="#a78bfa" label="Pressure" unit="hPa" />
+            <RadialGauge value={activeUvIndex} max={10} color="#fbbf24" label="UV Index" unit="/10" />
           </div>
 
           {/* Detailed metrics strip */}
@@ -358,11 +400,11 @@ export const WeatherPage: React.FC = () => {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Live Sensor Readings</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
-                { icon: Droplets, label: 'Relative Humidity', value: '72%', sub: 'High — humid conditions', color: 'text-blue-400' },
-                { icon: Wind, label: 'Wind Speed', value: '14 km/h', sub: 'Direction: WNW', color: 'text-emerald-400' },
+                { icon: Droplets, label: 'Relative Humidity', value: `${activeHumidity}%`, sub: activeHumidity > 65 ? 'High humidity' : 'Optimal range', color: 'text-blue-400' },
+                { icon: Wind, label: 'Wind Speed', value: `${activeWind} km/h`, sub: 'Direction: WNW', color: 'text-emerald-400' },
                 { icon: Eye, label: 'Visibility', value: '9.2 km', sub: 'Clear view', color: 'text-slate-300' },
-                { icon: Gauge, label: 'Pressure', value: '1013 hPa', sub: 'Stable — no change', color: 'text-purple-400' },
-                { icon: Thermometer, label: 'Dew Point', value: '18°C', sub: 'Moderate moisture', color: 'text-amber-400' },
+                { icon: Gauge, label: 'Pressure', value: `${activePressure} hPa`, sub: 'Stable', color: 'text-purple-400' },
+                { icon: Thermometer, label: 'Dew Point', value: `${activeTemp - 4}°C`, sub: 'Moderate moisture', color: 'text-amber-400' },
                 { icon: Droplets, label: 'Precipitation', value: '0mm', sub: 'Last 24 hours', color: 'text-cyan-400' },
               ].map((metric) => {
                 const Icon = metric.icon;
@@ -393,7 +435,7 @@ export const WeatherPage: React.FC = () => {
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Hourly Forecast</p>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
-          {HOURLY.map((h, i) => (
+          {activeHourly.map((h, i) => (
             <motion.div
               key={h.hour}
               initial={{ opacity: 0, y: 10 }}
@@ -541,15 +583,21 @@ export const WeatherPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {FARMING_TIPS.map((tip, i) => {
-            const Icon = tip.icon;
+          {activeAdvisories.map((tip, i) => {
+            const Icon = tip.priority === 'urgent' ? AlertTriangle : Sprout;
+            const cardColor = tip.priority === 'urgent'
+              ? 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+              : tip.priority === 'good'
+              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+              : 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+
             return (
               <motion.div
                 key={tip.title}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`p-4 rounded-2xl border flex gap-3 text-left ${tip.color} ${
+                className={`p-4 rounded-2xl border flex gap-3 text-left ${cardColor} ${
                   tip.priority === 'urgent' ? 'shadow-lg' : ''
                 }`}
               >

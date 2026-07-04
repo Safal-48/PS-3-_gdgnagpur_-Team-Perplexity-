@@ -286,12 +286,15 @@ export const OperationsPage: React.FC = () => {
         <div className="flex flex-col gap-3">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">Zone Control Panel</p>
           {zones.map((zone, i) => (
-            <motion.button
+            <motion.div
               key={zone.id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.07 }}
               onClick={() => setSelectedZone(zone)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setSelectedZone(zone)}
               className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
                 selectedZone.id === zone.id
                   ? 'bg-emerald-950/30 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.08)]'
@@ -340,7 +343,7 @@ export const OperationsPage: React.FC = () => {
                   }
                 </button>
               </div>
-            </motion.button>
+            </motion.div>
           ))}
         </div>
 
