@@ -40,12 +40,15 @@
 ---
 
 ## 🛠️ Technology Stack
-- **Framework**: React 19 + Vite (React-TS)
-- **Styling**: Tailwind CSS v4
+- **Framework**: Next.js 15 (React 19 App Router)
+- **Styling**: Tailwind CSS v4 + PostCSS
+- **Database / Auth / Storage**: Supabase (supabase-js SDK)
+- **AI Engine**: Gemini Pro / Vision APIs (google-generative-ai SDK)
 - **Animations**: Framer Motion
 - **3D Engine**: Three.js / React Three Fiber / Drei
 - **Icons**: Lucide Icons
 - **Deployment**: Vercel
+
 
 ---
 
