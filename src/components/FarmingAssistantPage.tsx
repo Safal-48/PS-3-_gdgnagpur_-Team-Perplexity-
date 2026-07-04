@@ -38,13 +38,25 @@ interface SuggestedTopic {
   color: string;
 }
 
-const SUGGESTED_TOPICS: SuggestedTopic[] = [
+const SUGGESTED_TOPICS_EN: SuggestedTopic[] = [
   { icon: Bug, label: 'Disease Control', query: 'My tomato leaves have brown spots with yellow halos. What disease is this and how do I treat it organically?', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
   { icon: Droplet, label: 'Irrigation Plan', query: 'Create an optimal drip irrigation schedule for Zone 3 corn crops during the monsoon season.', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
   { icon: Leaf, label: 'Crop Rotation', query: 'Recommend the best crop rotation plan after harvesting tomatoes in Zone A for maximum soil recovery.', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  { icon: Sun, label: 'Soil Health', query: 'What does a soil pH of 5.8 mean for my tomato crops and how do I correct it naturally?', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  { icon: BarChart3, label: 'Yield Forecast', query: 'Based on current sensor data showing 42% moisture and 94% crop health index, what is the expected yield for Zone 1 tomatoes?', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-  { icon: BookOpen, label: 'Planting Guide', query: 'What are the best companion plants for tomatoes to naturally repel aphids and boost nitrogen?', color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+  { icon: Sun, label: 'Soil Health', query: 'What does a soil pH of 5.8 mean for my tomato crops and how do I correct it naturally?', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' }
+];
+
+const SUGGESTED_TOPICS_HI: SuggestedTopic[] = [
+  { icon: Bug, label: 'रोग नियंत्रण', query: 'मेरे टमाटर के पत्तों पर पीले घेरे वाले भूरे धब्बे हैं। यह कौन सा रोग है और इसका जैविक उपचार क्या है?', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+  { icon: Droplet, label: 'सिंचाई योजना', query: 'मानसून के मौसम में जोन 3 मक्का फसलों के लिए एक अनुकूल ड्रिप सिंचाई अनुसूची बनाएं।', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+  { icon: Leaf, label: 'फसल चक्र', query: 'अधिकतम मिट्टी की रिकवरी के लिए जोन ए में टमाटर की कटाई के बाद फसल चक्र की सिफारिश करें।', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  { icon: Sun, label: 'मिट्टी स्वास्थ्य', query: 'टमाटर के लिए मिट्टी का पीएच 5.8 होने का क्या मतलब है और इसे प्राकृतिक रूप से कैसे सुधारें?', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' }
+];
+
+const SUGGESTED_TOPICS_MR: SuggestedTopic[] = [
+  { icon: Bug, label: 'रोग नियंत्रण', query: 'माझ्या टोमॅटोच्या पानांवर पिवळ्या वर्तुळांसह तपकिरी ठिपके आहेत. हा कोणता रोग आहे आणि त्यावर सेंद्रिय उपचार काय आहेत?', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+  { icon: Droplet, label: 'सिंचन योजना', query: 'पावसाळ्यात झोन ३ मधील मका पिकांसाठी योग्य ठिबक सिंचन वेळापत्रक तयार करा.', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+  { icon: Leaf, label: 'पीक फेरपालट', query: 'मातीचे पुनरुज्जीवन करण्यासाठी झोन ए मधील टोमॅटो काढणीनंतर पीक फेरपालट सुचवा.', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  { icon: Sun, label: 'मातीचे आरोग्य', query: 'मातीचा पीएच ५.८ असल्यास टोमॅटो पिकावर काय परिणाम होतो आणि तो नैसर्गिकरीत्या कसा सुधारावा?', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' }
 ];
 
 const AI_RESPONSES: Record<string, string> = {
@@ -57,8 +69,29 @@ const AI_RESPONSES: Record<string, string> = {
   companion: "🌱 **Companion Planting Guide for Tomatoes**\n\nStrategic companion planting can naturally repel aphids and boost your soil's nitrogen cycle:\n\n**Best Companions:**\n\n🌿 **Basil** (Plant 30cm from stems)\n• Repels aphids, spider mites, and thrips\n• Improves tomato flavor compounds\n• Plant 1 basil per 3 tomato plants\n\n💛 **Marigolds** (Border planting)\n• Releases limonene that deters aphids and whiteflies\n• Root secretions suppress nematodes\n• French variety (Tagetes patula) is most effective\n\n🫛 **Climbing Beans** (Trellis edge)\n• Fix atmospheric nitrogen (80-120 kg N/ha)\n• Provide shade reducing soil moisture loss\n\n❌ **Avoid near Tomatoes:**\n• Fennel, brassicas (allelopathic)\n• Corn (attracts shared pests)\n\n📍 **Zone A Specific Plan:** Plant marigold border rows along the north edge to block aphid entry from the field boundary."
 };
 
-function getAIResponse(query: string): string {
+function getAIResponse(query: string, lang: string): string {
   const q = query.toLowerCase();
+  
+  if (lang === 'hi') {
+    if (q.includes('spot') || q.includes('blight') || q.includes('disease') || q.includes('brown')) {
+      return "🍃 **टमाटर लेट ब्लाइट विश्लेषण (कृषिमित्र मॉक)**\n\nपीले प्रभामंडल वाले भूरे धब्बे **फाइटोफ्थोरा इन्फेस्टन्स** (लेट ब्लाइट) को दर्शाते हैं।\n\n**तत्काल कार्रवाई:**\n• सभी संक्रमित पत्तियों को छांटें और उन्हें नष्ट करें\n• **तांबा आधारित कवकनाशी** स्प्रे लगाएं\n• सिंचाई बंद करें — ड्रिप सिंचाई का उपयोग करें\n\n⚠️ गंभीरता: मध्यम। प्रसार को रोकने के लिए 48 घंटे के भीतर कार्रवाई करें।";
+    }
+    if (q.includes('irrig') || q.includes('water') || q.includes('drip') || q.includes('moisture')) {
+      return "💧 **जोन 3 मक्का सिंचाई अनुसूची (कृषिमित्र मॉक)**\n\nवर्तमान मिट्टी की नमी 32% को देखते हुए:\n• सोमवार 06:00 → 12 मिनट ड्रिप चक्र\n• बुधवार 06:00 → 8 मिनट ड्रिप चक्र\n• शुक्रवार → वर्षा होने पर बंद करें\n\n📊 अनुमानित पानी की बचत: 340 लीटर प्रति सप्ताह।";
+    }
+    return "नमस्ते! मैंने आपके सभी सक्रिय सेंसर नोड्स का विश्लेषण किया है। वर्तमान मिट्टी की नमी (42.8%) और फसल स्वास्थ्य सूचकांक (94.2) को देखते हुए, आपकी फसलें अच्छी स्थिति में हैं। आप मुझसे कोई भी कृषि प्रश्न पूछ सकते हैं।";
+  }
+  
+  if (lang === 'mr') {
+    if (q.includes('spot') || q.includes('blight') || q.includes('disease') || q.includes('brown')) {
+      return "🍃 **टोमॅटो लेट ब्लाइट विश्लेषण (कृषिमित्र मॉक)**\n\nपिवळे डाग आणि तपकिरी ठिपके **फायटोफ्थोरा इन्फेस्टन्स** (लेट ब्लाइट) दर्शवतात.\n\n**तात्काळ उपाय:**\n• सर्व संक्रमित पाने छाटून टाका आणि नष्ट करा\n• **तांबे-आधारित बुरशीनाशक** फवारणी करा\n• ठिबक सिंचन पद्धतीचा वापर करा\n\n⚠️ धोका: मध्यम. रोग प्रसार रोखण्यासाठी ४८ तासांत कारवाई करा.";
+    }
+    if (q.includes('irrig') || q.includes('water') || q.includes('drip') || q.includes('moisture')) {
+      return "💧 **झोन ३ मका सिंचन वेळापत्रक (कृषिमित्र मॉक)**\n\nसध्याची मातीतील आर्द्रता ३२% पाहता:\n• सोमवार ०६:०० → १२ मिनिटे ठिबक सिंचन\n• बुधवार ०६:०० → ८ मिनिटे ठिबक सिंचन\n• शुक्रवार → पाऊस पडल्यास पाणी देणे थांबवा\n\n📊 अंदाजित पाण्याची बचत: ३४० लीटर प्रति आठवडा.";
+    }
+    return "नमस्कार! मी तुमच्या शेतातील सर्व सक्रिय सेन्सरचे विश्लेषण केले आहे. मातीची आर्द्रता (४२.८%) आणि पीक आरोग्य निर्देशांक (९४.२) उत्तम आहे. तुम्हाला शेतीबद्दल काही मदत हवी आहे का?";
+  }
+
   if (q.includes('spot') || q.includes('blight') || q.includes('disease') || q.includes('brown')) return AI_RESPONSES.disease;
   if (q.includes('irrig') || q.includes('water') || q.includes('drip') || q.includes('moisture')) return AI_RESPONSES.irrigation;
   if (q.includes('rotat') || q.includes('after harvest') || q.includes('follow')) return AI_RESPONSES.rotation;
@@ -145,6 +178,7 @@ const MessageContent: React.FC<{ content: string }> = ({ content }) => {
 };
 
 export const FarmingAssistantPage: React.FC = () => {
+  const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',
@@ -164,6 +198,24 @@ export const FarmingAssistantPage: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+
+  // Translate welcome message when language changes (if user hasn't chatted yet)
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].id === '0') {
+      let welcome = "Namaste! 🌱 I'm **KrishiMitra AI** — your intelligent farm co-pilot.\n\nI've connected to your 12 active sensor nodes and analyzed Zone 1–3 telemetry. Your crops are performing well with a health index of **94.2/100**.\n\nHow can I help you optimize your farm today? You can ask me about diseases, irrigation, soil health, crop rotations, or anything else farming-related.";
+      if (lang === 'hi') {
+        welcome = "नमस्ते! 🌱 मैं **कृषिमित्र एआई (KrishiMitra AI)** हूँ — आपका बुद्धिमान कृषि सलाहकार।\n\nमैंने आपके 12 सक्रिय सेंसर नोड्स को जोड़ा है और ज़ोन 1-3 टेलीमेट्री का विश्लेषण किया है। आपकी फसलें **94.2/100** के स्वास्थ्य सूचकांक के साथ बेहतरीन काम कर रही हैं।\n\nआज मैं आपके खेत को बेहतर बनाने में कैसे सहायता कर सकता हूँ? आप मुझसे रोग नियंत्रण, सिंचाई योजना, मिट्टी के स्वास्थ्य, या फसल चक्र के बारे में पूछ सकते हैं।";
+      } else if (lang === 'mr') {
+        welcome = "नमस्कार! 🌱 मी **कृषिमित्र एआय (KrishiMitra AI)** आहे — तुमचा बुद्धिमान शेती सल्लागार आणि को-पायलट.\n\nमी तुमच्या १२ सक्रिय सेन्सर नोड्सशी कनेक्ट केले आहे आणि झोन १-३ टेलीमेट्रीचे विश्लेषण केले आहे. तुमचे पिके **९४.२/१००** आरोग्य निर्देशांकासह उत्तम कामगिरी करत आहेत.\n\nमी तुम्हाला शेती व्यवस्थापनामध्ये कशी मदत करू? तुम्ही मला पिकांवरील रोग, सिंचन नियोजन, मातीचे आरोग्य किंवा पीक फेरपालटाबद्दल विचारू शकता.";
+      }
+      setMessages([{
+        id: '0',
+        role: 'assistant',
+        content: welcome,
+        timestamp: new Date()
+      }]);
+    }
+  }, [lang]);
 
   // Auto-scroll chat
   const scrollToBottom = useCallback(() => {
@@ -196,7 +248,15 @@ export const FarmingAssistantPage: React.FC = () => {
     recognitionRef.current = new SpeechRecognition();
     recognitionRef.current.continuous = false;
     recognitionRef.current.interimResults = true;
-    recognitionRef.current.lang = 'en-IN';
+
+    // Adjust speech code matching user selection
+    if (lang === 'hi') {
+      recognitionRef.current.lang = 'hi-IN';
+    } else if (lang === 'mr') {
+      recognitionRef.current.lang = 'mr-IN';
+    } else {
+      recognitionRef.current.lang = 'en-IN';
+    }
 
     recognitionRef.current.onresult = (e: any) => {
       const transcript = Array.from(e.results).map((r: any) => r[0].transcript).join('');
@@ -237,13 +297,13 @@ export const FarmingAssistantPage: React.FC = () => {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed })
+        body: JSON.stringify({ message: trimmed, lang })
       });
       const data = await response.json();
       responseText = data.content;
     } catch (err) {
       console.error('AI chat endpoint query failed, falling back to mock:', err);
-      responseText = getAIResponse(trimmed);
+      responseText = getAIResponse(trimmed, lang);
     }
 
     const aiMsg: Message = {
@@ -275,10 +335,16 @@ export const FarmingAssistantPage: React.FC = () => {
   };
 
   const clearChat = () => {
+    let resetText = "Chat cleared. Ready for a fresh conversation! 🌱 How can I help with your farm today?";
+    if (lang === 'hi') {
+      resetText = "चैट साफ़ हो गई है। नया संवाद शुरू करने के लिए तैयार! 🌱";
+    } else if (lang === 'mr') {
+      resetText = "चॅट साफ केली आहे. नवीन संभाषणासाठी तयार! 🌱";
+    }
     setMessages([{
       id: '0',
       role: 'assistant',
-      content: "Chat cleared. Ready for a fresh conversation! 🌱 How can I help with your farm today?",
+      content: resetText,
       timestamp: new Date(),
     }]);
     setShowClearConfirm(false);
@@ -313,11 +379,32 @@ export const FarmingAssistantPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Sensor status badge */}
           <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
             12 Nodes Active
+          </div>
+
+          {/* Language Selector pills */}
+          <div className="flex items-center bg-slate-950/40 border border-slate-800/80 rounded-full p-0.5">
+            {[
+              { code: 'en', label: 'EN' },
+              { code: 'hi', label: 'हिंदी' },
+              { code: 'mr', label: 'मराठी' }
+            ].map((item) => (
+              <button
+                key={item.code}
+                onClick={() => setLang(item.code as any)}
+                className={`px-2.5 py-1 rounded-full text-[9px] font-bold transition-all cursor-pointer ${
+                  lang === item.code
+                    ? 'bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/10'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
           
           {/* Clear Chat */}
@@ -367,9 +454,9 @@ export const FarmingAssistantPage: React.FC = () => {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                className="grid grid-cols-2 md:grid-cols-3 gap-3 pb-2"
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 pb-2"
               >
-                {SUGGESTED_TOPICS.map((topic, idx) => {
+                {(lang === 'hi' ? SUGGESTED_TOPICS_HI : lang === 'mr' ? SUGGESTED_TOPICS_MR : SUGGESTED_TOPICS_EN).map((topic, idx) => {
                   const Icon = topic.icon;
                   return (
                     <motion.button
