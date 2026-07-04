@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-emerald-450: #10b981;
+  
+  --animate-laser: laser 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-float-slow: floatSlow 8s ease-in-out infinite;
+  --animate-glow-pulse: glowPulse 3s ease-in-out infinite;
+  --animate-drift-leaf-1: driftLeaf1 18s linear infinite;
+  --animate-drift-leaf-2: driftLeaf2 24s linear infinite;
+  --animate-drift-leaf-3: driftLeaf3 30s linear infinite;
+
+  @keyframes laser {
+    0%, 100% {
+      top: 0%;
+      opacity: 0.8;
+    }
+    50% {
+      top: 100%;
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes floatSlow {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(2deg);
+    }
+  }
+
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 0 0 15px 0px rgba(16, 185, 129, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 25px 5px rgba(16, 185, 129, 0.25);
+    }
+  }
+
+  @keyframes driftLeaf1 {
+    0% {
+      transform: translate(-10%, -10%) rotate(0deg);
+    }
+    50% {
+      transform: translate(50%, 40%) rotate(180deg);
+    }
+    100% {
+      transform: translate(110%, 110%) rotate(360deg);
+    }
+  }
+
+  @keyframes driftLeaf2 {
+    0% {
+      transform: translate(110%, -10%) rotate(0deg);
+    }
+    50% {
+      transform: translate(60%, 50%) rotate(-180deg);
+    }
+    100% {
+      transform: translate(-10%, 110%) rotate(-360deg);
+    }
+  }
+
+  @keyframes driftLeaf3 {
+    0% {
+      transform: translate(50%, -20%) rotate(0deg);
+    }
+    50% {
+      transform: translate(20%, 60%) rotate(120deg);
+    }
+    100% {
+      transform: translate(80%, 120%) rotate(240deg);
+    }
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
+}
+
+/* Base resets & styles */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #030712;
+  color: #f3f4f6;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.05);
+}
+
+.glass-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-input:focus {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.glass-button-primary {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glass-button-primary:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 1) 0%, rgba(5, 150, 105, 1) 100%);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.glass-button-secondary {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-button-secondary:hover {
+  transform: translateY(-1px);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+/* Glass card active borders */
+.glass-active {
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Custom radial glows */
+.bg-glow-radial {
+  background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 60%);
+}
+
+.bg-glow-radial-blue {
+  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.15) 0%, transparent 60%);
+}
